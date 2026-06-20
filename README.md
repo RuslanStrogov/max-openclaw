@@ -1,7 +1,19 @@
 <div align="center">
 
+  <h3>🛠️ Технологии</h3>
+
+  <p>
+    <img src="https://img.shields.io/badge/TypeScript-5.5+-3178C6?logo=typescript&logoColor=white" alt="TypeScript"/>
+    <img src="https://img.shields.io/badge/Node.js-22+-339933?logo=nodedotjs&logoColor=white" alt="Node.js"/>
+    <img src="https://img.shields.io/badge/OpenClaw-2026.6+-FF6B00?logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iI0Y2QjAwMCI+PHBhdGggZD0iTTEyIDJMMTggOEwxOCAyMkw2IDIyTDYgOEwxMiAyWiIvPjwvc3ZnPg==&logoColor=white" alt="OpenClaw"/>
+    <img src="https://img.shields.io/badge/MAX-Bot%20API-6366F1?logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iIzYzNjZmMSI+PHBhdGggZD0iTTEyIDJMMTggOEwxOCAyMkw2IDIyTDYgOEwxMiAyWiIvPjwvc3ZnPg==&logoColor=white" alt="MAX"/>
+    <img src="https://img.shields.io/badge/Vitest-2.0+-6E9F18?logo=vitest&logoColor=white" alt="Vitest"/>
+    <img src="https://img.shields.io/badge/GitHub%20Actions-2088FF?logo=githubactions&logoColor=white" alt="GitHub Actions"/>
+    <img src="https://img.shields.io/badge/License-MIT-22C55E" alt="MIT"/>
+  </p>
+
   <h3>MAX Messenger — Channel Plugin для OpenClaw</h3>
-  <p>Подключает мессенджер <a href="https://max.ru">MAX</a> через Bot API — полная интеграция с AI-агентом</p>
+  <p>Нативный плагин-канал для подключения мессенджера <a href="https://max.ru">MAX</a> через Bot API к AI-агенту <a href="https://docs.openclaw.ai">OpenClaw</a></p>
 
   <p><sub>🎨 Designed by <a href="https://br-design.ru/">BR-DESIGN</a></sub></p>
 
@@ -12,9 +24,11 @@
 ## 📋 Содержание
 
 - [Возможности](#-возможности)
+- [Требования](#-требования)
 - [Установка](#-установка)
 - [Настройка](#-настройка)
 - [Использование](#-использование)
+- [Структура проекта](#-структура-проекта)
 - [Архитектура](#-архитектура)
 - [Конфигурация](#-конфигурация)
 - [MAX Bot API](#-max-bot-api)
@@ -27,6 +41,8 @@
 ---
 
 ## ✨ Возможности
+
+### Что уже работает
 
 | Фича | Статус |
 |------|--------|
@@ -49,14 +65,16 @@
 
 ---
 
-## 📦 Установка
-
-### Предварительные требования
+## 📋 Требования
 
 - [OpenClaw](https://docs.openclaw.ai) >= 2026.6.1
 - Node.js >= 22 (для разработки)
 - Сервер с публичным IP для приёма webhook
 - SSL-сертификат (Let's Encrypt или самоподписанный)
+
+---
+
+## 📦 Установка
 
 ### Установка плагина
 
@@ -101,7 +119,7 @@ openclaw gateway restart
 1. Перейдите на [портал MAX для партнёров](https://business.max.ru)
 2. **Создайте и верифицируйте профиль** организации, ИП или самозанятого
 3. В панели управления нажмите **«Добавить бота»**
-4. Заполните данные бота (карточка):
+4. Заполните данные бота (карточку):
    - **Название** — от 1 до 59 символов
    - **Никнейм** — генерируется автоматически (должен заканчиваться на `_bot`)
    - Сайт организации, логотип и описание
@@ -229,28 +247,7 @@ openclaw gateway restart
 
 ---
 
-## 🏗️ Архитектура
-
-```
-┌──────────┐   webhook    ┌─────────────────┐   native    ┌──────────────┐
-│          │ ──────────►  │                 │ ──────────►  │              │
-│ MAX Bot  │              │ MAX Messenger   │              │ OpenClaw     │
-│ API      │ ◄──────────  │ Plugin          │ ◄──────────  │ Agent        │
-│          │  send_msg    │ (TypeScript)    │  response    │              │
-└──────────┘              └─────────────────┘              └──────────────┘
-```
-
-### Поток сообщений
-
-1. Пользователь пишет боту в MAX
-2. MAX API отправляет webhook на плагин
-3. Плагин верифицирует HMAC-SHA256 подпись
-4. Плагин проверяет DM policy / allowlist
-5. Плагин передаёт сообщение в OpenClaw Agent
-6. Агент генерирует ответ
-7. Плагин отправляет ответ обратно в MAX через Bot API
-
-### Структура проекта
+## 📁 Структура проекта
 
 ```
 max-openclaw/
@@ -278,9 +275,33 @@ max-openclaw/
 ├── openclaw.plugin.json      # Plugin manifest
 ├── tsconfig.json
 ├── vitest.config.ts
-├── README.md
-└── CHANGELOG.md
+├── CHANGELOG.md
+├── LICENSE
+└── README.md
 ```
+
+---
+
+## 🏗️ Архитектура
+
+```
+┌──────────┐   webhook    ┌─────────────────┐   native    ┌──────────────┐
+│          │ ──────────►  │                 │ ──────────►  │              │
+│ MAX Bot  │              │ MAX Messenger   │              │ OpenClaw     │
+│ API      │ ◄──────────  │ Plugin          │ ◄──────────  │ Agent        │
+│          │  send_msg    │ (TypeScript)    │  response    │              │
+└──────────┘              └─────────────────┘              └──────────────┘
+```
+
+### Поток сообщений
+
+1. Пользователь пишет боту в MAX
+2. MAX API отправляет webhook на плагин
+3. Плагин верифицирует HMAC-SHA256 подпись
+4. Плагин проверяет DM policy / allowlist
+5. Плагин передаёт сообщение в OpenClaw Agent
+6. Агент генерирует ответ
+7. Плагин отправляет ответ обратно в MAX через Bot API
 
 ---
 
@@ -441,12 +462,6 @@ npm install
 npm run build
 ```
 
-### Тестирование
-
-```bash
-npm test
-```
-
 ### Линтинг
 
 ```bash
@@ -501,9 +516,11 @@ npx vitest run --coverage
 ### Создание релиза
 
 ```bash
+# Собрать изменения в develop
 git checkout develop
 # ... коммиты ...
 
+# Слить в main и создать тег
 git checkout main
 git merge develop --no-ff
 git tag -a v1.1.0 -m "Release v1.1.0: описание"
@@ -522,7 +539,7 @@ MIT License. См. [LICENSE](LICENSE).
 
 | Проект | Описание |
 |--------|----------|
-| [MAX Hermes Bridge](https://github.com/RuslanStrogov/max-hermes) | Python-мост между MAX Bot API и Hermes Agent через CLI. Webhook, Docker, systemd. |
+| [MAX Hermes Bridge](https://github.com/RuslanStrogov/max-hermes) | Python-мост между MAX Bot API и Hermes Agent через CLI с поддержкой webhook, Docker и systemd. |
 | [MAX Hermes Plugin](https://github.com/RuslanStrogov/max-hermes-plugin) | Нативный платформенный плагин для Hermes Gateway. Прямая интеграция MAX без моста. |
 
 <div align="center">
