@@ -11,9 +11,9 @@
   },
   "openclaw": {
     "extensions": [
-      "./index.ts"
+      "./dist/index.js"
     ],
-    "setupEntry": "./setup-entry.ts",
+    "setupEntry": "./dist/setup-entry.js",
     "channel": {
       "id": "max-messenger",
       "label": "MAX Messenger",
@@ -30,7 +30,7 @@
   },
   "scripts": {
     "test": "vitest run",
-    "build": "tsc --noEmit",
+    "build": "tsc --outDir dist --module NodeNext --moduleResolution NodeNext --target ES2022 --esModuleInterop --skipLibCheck --noEmitOnError false",
     "lint": "tsc --noEmit --pretty",
     "dev": "vitest"
   },
