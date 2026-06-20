@@ -59,6 +59,7 @@ export type MaxAttachmentType =
   | 'sticker';
 
 export interface MaxAttachmentPayload {
+  type?: string;
   url?: string;
   token?: string;
   buttons?: MaxInlineKeyboardButton[][];
@@ -67,6 +68,11 @@ export interface MaxAttachmentPayload {
 export interface MaxInlineKeyboardButton {
   text: string;
   payload: string;
+  style?: 'primary' | 'secondary' | 'danger';
+}
+
+export interface MaxInlineKeyboardMarkup {
+  inline_keyboard: MaxInlineKeyboardButton[][];
 }
 
 // API response types

@@ -7,7 +7,9 @@
  */
 
 import type {
+  MaxAttachment,
   MaxBotInfo,
+  MaxInlineKeyboardButton,
   MaxOutboundMessage,
   MaxOutboundTarget,
   MaxSendResult,
@@ -154,6 +156,31 @@ export class MaxClient {
     }
 
     return response.json() as Promise<MaxUploadResult>;
+  }
+
+  /**
+   * Send a message with inline keyboard buttons.
+   */
+  async sendMessageWithKeyboard(
+    target: MaxOutboundTarget,
+    message: MaxOutboundMessage,
+    keyboard: MaxInlineKeyboardButton[][]
+  ): Promise<MaxSendResult> {
+    const attachments: MaxAttachment[] = [];
+
+    if (message.attachments) {
+      attachments.push(...message.attachments);
+    }
+
+    attachments.push({
+      type: 'inline_keyboard',
+      payload: { buttons: keyboard },
+    });
+
+    return this.sendMessage(target, {
+      ...message,
+      attachments,
+    });
   }
 
   /**
