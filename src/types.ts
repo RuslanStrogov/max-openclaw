@@ -128,7 +128,7 @@ export interface MaxGroupConfig {
 // Resolved account type for OpenClaw
 
 export interface ResolvedMaxAccount {
-  accountId: string | null;
+  accountId?: string | null;
   token: string;
   allowFrom: Array<string | number>;
   dmPolicy: string;
