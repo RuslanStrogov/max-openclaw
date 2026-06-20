@@ -1,0 +1,39 @@
+{
+  "name": "@ruslanstrogov/max-openclaw",
+  "version": "1.0.0",
+  "description": "MAX Messenger channel plugin for OpenClaw",
+  "type": "module",
+  "license": "MIT",
+  "author": "Ruslan Strogov",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/RuslanStrogov/max-openclaw"
+  },
+  "openclaw": {
+    "extensions": [
+      "./index.ts"
+    ],
+    "setupEntry": "./setup-entry.ts",
+    "channel": {
+      "id": "max-messenger",
+      "label": "MAX Messenger",
+      "blurb": "Connect OpenClaw to MAX Bot API (max.ru)"
+    },
+    "compat": {
+      "pluginApi": ">=2026.3.24-beta.2",
+      "minGatewayVersion": "2026.3.24-beta.2"
+    },
+    "build": {
+      "openclawVersion": "2026.6.1",
+      "pluginSdkVersion": "2026.6.1"
+    }
+  },
+  "dependencies": {
+    "ws": "^8.18.0",
+    "zod": "^3.23.0"
+  },
+  "devDependencies": {
+    "@openclaw/plugin-sdk": "^2026.6.1",
+    "typescript": "^5.5.0"
+  }
+}

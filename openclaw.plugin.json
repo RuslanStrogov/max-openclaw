@@ -1,0 +1,113 @@
+{
+  "id": "max-messenger",
+  "name": "MAX Messenger",
+  "description": "MAX Messenger (max.ru) Bot API channel plugin for OpenClaw",
+  "kind": "channel",
+  "activation": {
+    "onStartup": false
+  },
+  "channels": [
+    "max-messenger"
+  ],
+  "channelEnvVars": {
+    "max-messenger": [
+      "MAX_BOT_TOKEN"
+    ]
+  },
+  "configSchema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "enabled": {
+        "type": "boolean"
+      },
+      "token": {
+        "type": "string"
+      },
+      "webhookUrl": {
+        "type": "string",
+        "format": "uri"
+      },
+      "webhookSecret": {
+        "type": "string"
+      },
+      "apiBaseUrl": {
+        "type": "string",
+        "format": "uri"
+      },
+      "dmPolicy": {
+        "type": "string",
+        "enum": ["pairing", "allowlist", "open", "disabled"]
+      },
+      "allowFrom": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "groupPolicy": {
+        "type": "string",
+        "enum": ["open", "disabled", "allowlist"]
+      },
+      "groups": {
+        "type": "object",
+        "propertyNames": {
+          "type": "string"
+        },
+        "additionalProperties": {
+          "type": "object",
+          "properties": {
+            "requireMention": {
+              "type": "boolean"
+            },
+            "enabled": {
+              "type": "boolean"
+            },
+            "allowFrom": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "homeChannel": {
+        "type": "string"
+      }
+    }
+  },
+  "channelConfigs": {
+    "max-messenger": {
+      "label": "MAX Messenger",
+      "description": "Connect OpenClaw to MAX messenger via Bot API",
+      "schema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "required": ["token"],
+        "properties": {
+          "name": { "type": "string" },
+          "token": { "type": "string" },
+          "webhookUrl": { "type": "string" },
+          "webhookSecret": { "type": "string" },
+          "apiBaseUrl": { "type": "string" },
+          "dmPolicy": {
+            "type": "string",
+            "enum": ["pairing", "allowlist", "open", "disabled"]
+          },
+          "allowFrom": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "groupPolicy": {
+            "type": "string",
+            "enum": ["open", "disabled", "allowlist"]
+          },
+          "homeChannel": { "type": "string" }
+        },
+        "additionalProperties": false
+      }
+    }
+  }
+}
