@@ -44,9 +44,19 @@ export interface MaxCallback {
 }
 
 export interface MaxAttachment {
-  type: 'image' | 'video' | 'audio' | 'file' | 'inline_keyboard' | 'contact' | 'location' | 'sticker';
+  type: MaxAttachmentType;
   payload: MaxAttachmentPayload;
 }
+
+export type MaxAttachmentType =
+  | 'image'
+  | 'video'
+  | 'audio'
+  | 'file'
+  | 'inline_keyboard'
+  | 'contact'
+  | 'location'
+  | 'sticker';
 
 export interface MaxAttachmentPayload {
   url?: string;
@@ -96,15 +106,16 @@ export interface MaxOutboundTarget {
 
 // Config types
 
-export interface MaxMessengerConfig {
+export interface MaxMessengerAccount {
+  accountId: string;
   token: string;
+  allowFrom: string[];
+  dmPolicy: 'pairing' | 'allowlist' | 'open' | 'disabled';
+  groupPolicy: 'open' | 'disabled' | 'allowlist';
+  groups: Record<string, MaxGroupConfig>;
   webhookUrl?: string;
   webhookSecret?: string;
   apiBaseUrl?: string;
-  dmPolicy?: 'pairing' | 'allowlist' | 'open' | 'disabled';
-  allowFrom?: string[];
-  groupPolicy?: 'open' | 'disabled' | 'allowlist';
-  groups?: Record<string, MaxGroupConfig>;
   homeChannel?: string;
 }
 
@@ -114,22 +125,17 @@ export interface MaxGroupConfig {
   allowFrom?: string[];
 }
 
-// Normalized types for OpenClaw
+// Resolved account type for OpenClaw
 
-export interface MaxInboundContext {
-  channelId: 'max-messenger';
-  chatId: string;
-  userId: string;
-  userName: string;
-  text: string;
-  timestamp: number;
-  isGroup: boolean;
-  messageId: string;
-  attachments: MaxNormalizedAttachment[];
+export interface ResolvedMaxAccount {
+  accountId: string | null;
+  token: string;
+  allowFrom: Array<string | number>;
+  dmPolicy: string;
+  groupPolicy: string;
+  groups: Record<string, MaxGroupConfig>;
+  webhookUrl?: string;
+  webhookSecret?: string;
+  apiBaseUrl?: string;
+  homeChannel?: string;
 }
-
-export type MaxNormalizedAttachment = {
-  type: 'image' | 'video' | 'audio' | 'file';
-  url?: string;
-  token?: string;
-};

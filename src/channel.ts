@@ -1,48 +1,82 @@
 /**
  * MAX Messenger channel plugin for OpenClaw.
  *
- * Connects to MAX Bot API (max.ru) via webhooks and REST API.
- * Supports text, images, files, audio, inline keyboard, and typing indicators.
+ * Uses the modern channel plugin architecture with:
+ * - createChatChannelPlugin for the channel definition
+ * - defineChannelMessageAdapter for outbound message sending
+ *
+ * MAX Bot API: https://dev.max.ru/docs/chatbots/bots-create
  */
 
-import { createChatChannelPlugin, createChannelPluginBase } from 'openclaw/plugin-sdk/channel-core';
-import type { MaxMessengerConfig, MaxGroupConfig } from './types.js';
-import { MaxClient, MaxApiError } from './client.js';
+import {
+  createChatChannelPlugin,
+  createChannelPluginBase,
+} from 'openclaw/plugin-sdk/channel-core';
+import type { ResolvedMaxAccount } from './types.js';
+
+import { MaxClient } from './client.js';
 
 /**
- * Resolve account from config.
+ * Resolve account from OpenClaw config section.
  */
-function resolveAccount(cfg: MaxMessengerConfig, accountId: string) {
+function resolveAccount(cfg: any, accountId: string): ResolvedMaxAccount {
+  const channelCfg = cfg?.channels?.['max-messenger'] || {};
+  const accounts = channelCfg.accounts || {};
+  const account = accounts[accountId] || channelCfg;
+
   return {
-    accountId,
-    token: cfg.token || '',
-    allowFrom: cfg.allowFrom || [],
-    dmPolicy: cfg.dmPolicy || 'pairing',
+    accountId: accountId || null,
+    token: account.token || channelCfg.token || process.env.MAX_BOT_TOKEN || '',
+    allowFrom: account.allowFrom || channelCfg.allowFrom || [],
+    dmPolicy: account.dmPolicy || channelCfg.dmPolicy || 'pairing',
+    groupPolicy: account.groupPolicy || channelCfg.groupPolicy || 'allowlist',
+    groups: account.groups || channelCfg.groups || {},
+    webhookUrl: account.webhookUrl || channelCfg.webhookUrl || process.env.MAX_WEBHOOK_URL,
+    webhookSecret: account.webhookSecret || channelCfg.webhookSecret || process.env.MAX_WEBHOOK_SECRET,
+    apiBaseUrl: account.apiBaseUrl || channelCfg.apiBaseUrl || process.env.MAX_API_BASE_URL,
+    homeChannel: account.homeChannel || channelCfg.homeChannel,
   };
 }
 
 /**
- * Check if account is configured (has token).
+ * Check if account is configured.
  */
-function isConfigured(cfg: MaxMessengerConfig): boolean {
-  return !!cfg.token;
+function isConfigured(cfg: any): boolean {
+  const resolved = resolveAccount(cfg, '');
+  return !!resolved.token;
 }
 
 /**
- * Describe account status.
+ * Inspect account status (read-only).
  */
-function inspectAccount(cfg: MaxMessengerConfig, accountId: string) {
+function inspectAccount(cfg: any, accountId: string) {
+  const resolved = resolveAccount(cfg, accountId);
   return {
     enabled: true,
-    configured: isConfigured(cfg),
-    tokenStatus: (cfg.token ? 'present' : 'missing') as 'present' | 'missing',
+    configured: !!resolved.token,
+    tokenStatus: (resolved.token ? 'present' : 'missing') as 'present' | 'missing',
+  };
+}
+
+/**
+ * Resolve session conversation from raw MAX conversation ID.
+ * Direct messages use user_id, group chats use chat_id.
+ */
+function resolveSessionConversation(rawId: string) {
+  const isGroup = rawId.startsWith('group:') || rawId.startsWith('chat:');
+  const baseId = rawId.replace(/^(group|chat|user):/, '');
+  return {
+    conversationId: baseId,
+    threadId: undefined,
+    baseConversationId: baseId,
+    parentConversationCandidates: [] as string[],
   };
 }
 
 /**
  * The MAX Messenger channel plugin.
  */
-export const maxMessengerPlugin = createChatChannelPlugin<MaxMessengerConfig>({
+export const maxMessengerPlugin = createChatChannelPlugin<ResolvedMaxAccount>({
   base: createChannelPluginBase({
     id: 'max-messenger',
 
@@ -50,58 +84,77 @@ export const maxMessengerPlugin = createChatChannelPlugin<MaxMessengerConfig>({
       resolveAccount,
       inspectAccount,
     },
+
+    capabilities: {
+      chatTypes: ['direct', 'group'],
+      reactions: false,
+      threads: false,
+      media: true,
+      nativeCommands: true,
+    },
   }),
 
+  // DM security policy
   security: {
     dm: {
       channelKey: 'max-messenger',
-      resolvePolicy: (cfg) => cfg.dmPolicy || 'pairing',
-      resolveAllowFrom: (cfg) => cfg.allowFrom || [],
+      resolvePolicy: (account) => account.dmPolicy,
+      resolveAllowFrom: (account) => account.allowFrom,
       defaultPolicy: 'pairing',
     },
   },
 
+  // Pairing flow (DM approval)
   pairing: {
     text: {
       idLabel: 'MAX username',
       message: 'Send this code to verify your identity:',
       notify: async ({ target, code }) => {
-        // Send pairing code via MAX
         const client = new MaxClient({ token: '' });
-        // Note: actual implementation sends via the configured token
+        await client.sendMessage(
+          { user_id: parseInt(target, 10) },
+          { text: `Your verification code: ${code}` }
+        );
       },
     },
   },
 
+  // Threading mode
   threading: {
     topLevelReplyToMode: 'reply',
   },
 
+  // Outbound messaging
   outbound: {
     attachedResults: {
+      channel: 'max-messenger',
+
       sendText: async ({ to, text, accountId, replyToId }) => {
-        const client = new MaxClient({ token: '' });
-        const result = await client.sendMessage(
-          { user_id: parseInt(to, 10) },
-          { text, reply_to: replyToId }
-        );
+        const account = resolveAccount({}, accountId || '');
+        const client = new MaxClient({ token: account.token, baseUrl: account.apiBaseUrl });
+        const target = parseTarget(to);
+        const result = await client.sendMessage(target, {
+          text,
+          reply_to: replyToId,
+        });
         return {
+          channel: 'max-messenger',
           messageId: result?.message?.body?.mid || '',
           conversationId: to,
         };
       },
-    },
 
-    base: {
-      sendMedia: async ({ to, media }) => {
-        const client = new MaxClient({ token: '' });
-        const target = { user_id: parseInt(to, 10) };
+      sendMedia: async ({ to, media, accountId }) => {
+        const account = resolveAccount({}, accountId || '');
+        const client = new MaxClient({ token: account.token, baseUrl: account.apiBaseUrl });
+        const target = parseTarget(to);
 
         if (media.kind === 'image') {
           const result = await client.sendMessage(target, {
             attachments: [{ type: 'image', payload: { url: media.url } }],
           });
           return {
+            channel: 'max-messenger',
             messageId: result?.message?.body?.mid || '',
             conversationId: to,
           };
@@ -112,6 +165,7 @@ export const maxMessengerPlugin = createChatChannelPlugin<MaxMessengerConfig>({
             attachments: [{ type: media.kind, payload: { url: media.url } }],
           });
           return {
+            channel: 'max-messenger',
             messageId: result?.message?.body?.mid || '',
             conversationId: to,
           };
@@ -122,16 +176,47 @@ export const maxMessengerPlugin = createChatChannelPlugin<MaxMessengerConfig>({
     },
   },
 
+  // Typing indicator via heartbeat
   heartbeat: {
     sendTyping: async ({ to }) => {
-      const client = new MaxClient({ token: '' });
-      await client.sendChatAction(parseInt(to, 10), 'typing_on');
+      const account = resolveAccount({}, '');
+      const client = new MaxClient({ token: account.token, baseUrl: account.apiBaseUrl });
+      const target = parseTarget(to);
+      if (target.chat_id) {
+        await client.sendChatAction(target.chat_id, 'typing_on');
+      }
     },
     clearTyping: async ({ to }) => {
-      const client = new MaxClient({ token: '' });
-      await client.sendChatAction(parseInt(to, 10), 'typing_off');
+      const account = resolveAccount({}, '');
+      const client = new MaxClient({ token: account.token, baseUrl: account.apiBaseUrl });
+      const target = parseTarget(to);
+      if (target.chat_id) {
+        await client.sendChatAction(target.chat_id, 'typing_off');
+      }
     },
   },
 });
 
-export { MaxClient, MaxApiError };
+/**
+ * Parse target string into MAX API target format.
+ * Formats: "user:12345", "chat:67890", or plain numeric ID (treated as user_id)
+ */
+function parseTarget(to: string): MaxOutboundTargetClean {
+  if (to.startsWith('user:')) {
+    return { user_id: parseInt(to.slice(5), 10) };
+  }
+  if (to.startsWith('chat:') || to.startsWith('group:')) {
+    return { chat_id: parseInt(to.split(':')[1], 10) };
+  }
+  // Plain numeric ID — treat as user_id
+  const num = parseInt(to, 10);
+  if (!isNaN(num)) {
+    return { user_id: num };
+  }
+  return { user_id: 0 };
+}
+
+interface MaxOutboundTargetClean {
+  user_id?: number;
+  chat_id?: number;
+}

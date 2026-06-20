@@ -2,13 +2,12 @@
  * MAX Messenger Channel Plugin — entry point.
  *
  * Registers the channel plugin with OpenClaw gateway:
- * - defineChannelPluginEntry for the channel
- * - registerFull for webhook HTTP route
+ * - defineChannelPluginEntry for the channel capability
+ * - registerFull for any additional runtime registration
  */
 
 import { defineChannelPluginEntry } from 'openclaw/plugin-sdk/channel-core';
 import { maxMessengerPlugin } from './src/channel.js';
-import { handleWebhook } from './src/webhook.js';
 
 export default defineChannelPluginEntry({
   id: 'max-messenger',
@@ -17,11 +16,7 @@ export default defineChannelPluginEntry({
   plugin: maxMessengerPlugin,
 
   registerFull(api) {
-    // Register webhook endpoint for inbound messages from MAX
-    api.registerHttpRoute({
-      path: '/max-messenger/webhook',
-      auth: 'plugin',
-      handler: handleWebhook,
-    });
+    // Additional runtime registration (if needed)
+    // Webhook handling is managed by OpenClaw's channel runtime
   },
 });

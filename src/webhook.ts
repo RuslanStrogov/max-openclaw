@@ -4,7 +4,7 @@
  * Processes inbound webhook requests from MAX Bot API:
  * - Verify HMAC-SHA256 signature
  * - Parse update type (message_created, message_callback)
- * - Dispatch to OpenClaw gateway
+ * - Transform to OpenClaw-compatible format for dispatch
  */
 
 import type { MaxWebhookUpdate } from './types.js';
@@ -13,7 +13,7 @@ export async function handleWebhook(req: any, res: any): Promise<void> {
   try {
     const body = await req.text();
     const signature = req.headers['x-max-signature'] || '';
-    const secret = process.env.MAX_WEBHOOK_SECRET || '';
+    const secret = (globalThis as any).MAX_WEBHOOK_SECRET || '';
 
     // Verify signature if secret is configured
     if (secret && signature) {

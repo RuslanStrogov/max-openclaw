@@ -95,7 +95,7 @@ export class MaxClient {
         body: { url, events: ['message_created', 'message_callback'] },
       });
       return result.ok !== false;
-    } catch {
+    } catch (_e) {
       return false;
     }
   }
@@ -164,35 +164,4 @@ export class MaxClient {
       body: { text: text || '' },
     });
   }
-
-  /**
-   * Verify webhook signature (HMAC-SHA256).
-   */
-  static verifySignature(body: string, signature: string, secret: string): boolean {
-    if (!secret || !signature) return false;
-
-    // HMAC-SHA256 computation
-    const encoder = new TextEncoder();
-    const keyData = encoder.encode(secret);
-    const bodyData = encoder.encode(body);
-
-    return crypto.subtle.importKey(
-      'raw',
-      keyData,
-      { name: 'HMAC', hash: 'SHA-256' },
-      false,
-      ['verify']
-    ).then(key => {
-      const sigBytes = hexToBuffer(signature);
-      return crypto.subtle.verify('HMAC', key, sigBytes, bodyData);
-    }).catch(() => false);
-  }
-}
-
-function hexToBuffer(hex: string): ArrayBuffer {
-  const bytes = new Uint8Array(hex.length / 2);
-  for (let i = 0; i < hex.length; i += 2) {
-    bytes[i / 2] = parseInt(hex.substring(i, i + 2), 16);
-  }
-  return bytes.buffer;
 }

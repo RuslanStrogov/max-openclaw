@@ -28,12 +28,20 @@
       "pluginSdkVersion": "2026.6.1"
     }
   },
+  "scripts": {
+    "test": "vitest run",
+    "build": "tsc --noEmit",
+    "lint": "tsc --noEmit --pretty",
+    "dev": "vitest"
+  },
   "dependencies": {
     "ws": "^8.18.0",
     "zod": "^3.23.0"
   },
   "devDependencies": {
     "@openclaw/plugin-sdk": "^2026.6.1",
-    "typescript": "^5.5.0"
+    "@types/node": "^22.0.0",
+    "typescript": "^5.5.0",
+    "vitest": "^2.0.0"
   }
 }
