@@ -537,10 +537,26 @@ MIT License. См. [LICENSE](LICENSE).
 
 ## 🔗 Связанные проекты
 
+### MAX Экосистема
+
 | Проект | Описание |
 |--------|----------|
-| [MAX Hermes Bridge](https://github.com/RuslanStrogov/max-hermes) | Python-мост между MAX Bot API и Hermes Agent через CLI с поддержкой webhook, Docker и systemd. |
-| [MAX Hermes Plugin](https://github.com/RuslanStrogov/max-hermes-plugin) | Нативный платформенный плагин для Hermes Gateway. Прямая интеграция MAX без моста. |
+| [MAX Hermes Bridge](https://github.com/RuslanStrogov/max-hermes) | Python-мост между MAX Bot API и Hermes Agent через CLI |
+| [MAX Hermes Plugin](https://github.com/RuslanStrogov/max-hermes-plugin) | Нативный плагин для Hermes Gateway (альтернатива мосту) |
+
+### Городская инфраструктура
+
+| Проект | Описание |
+|--------|----------|
+| [Krem-LAN WiFi](https://github.com/KremenkiLan/krem-lan-wifi) | Городская WiFi-сеть Кремёнки (Node.js + Arduino) |
+| [PlayBay Streaming](https://github.com/PlayBayStreaming/playbay-streaming-server) | Платформа стриминга — альтернатива Wowza |
+
+### IoT и Робототехника
+
+| Проект | Описание |
+|--------|----------|
+| [Robot Catty](https://github.com/RuslanStrogov/robot-catty) | Робот-кошка на Raspberry Pi + Arduino |
+| [COM-Pinger](https://github.com/RuslanStrogov/com-pinger) | Node.js ↔ Arduino мониторинг COM-портов |
 
 <div align="center">
 
