@@ -60,7 +60,7 @@ function describeAccount(account: ResolvedMaxAccount, _cfg: any) {
 /**
  * The MAX Messenger channel plugin.
  */
-export const maxMessengerPlugin = createChatChannelPlugin<ResolvedMaxAccount>({
+export const maxMessengerPlugin = createChatChannelPlugin<ResolvedMaxAccount>(({
   base: {
     id: 'max-messenger',
 
@@ -85,7 +85,7 @@ export const maxMessengerPlugin = createChatChannelPlugin<ResolvedMaxAccount>({
     },
 
     setup: {
-      applyAccountConfig: ({ cfg, accountId, input }) => {
+      applyAccountConfig: ({ cfg, accountId, input }: any) => {
         const newCfg = structuredClone(cfg);
         if (!newCfg.channels) newCfg.channels = {};
         if (!newCfg.channels['max-messenger']) newCfg.channels['max-messenger'] = {};
@@ -104,7 +104,7 @@ export const maxMessengerPlugin = createChatChannelPlugin<ResolvedMaxAccount>({
 
     messaging: {
       targetPrefixes: ['max', 'user', 'chat'],
-      resolveDeliveryTarget: ({ conversationId }) => {
+      resolveDeliveryTarget: ({ conversationId }: any) => {
         return { to: conversationId };
       },
     },
@@ -114,8 +114,8 @@ export const maxMessengerPlugin = createChatChannelPlugin<ResolvedMaxAccount>({
   security: {
     dm: {
       channelKey: 'max-messenger',
-      resolvePolicy: (account) => account.dmPolicy,
-      resolveAllowFrom: (account) => account.allowFrom,
+      resolvePolicy: (account: any) => account.dmPolicy,
+      resolveAllowFrom: (account: any) => account.allowFrom,
       defaultPolicy: 'pairing',
     },
   },
@@ -141,17 +141,17 @@ export const maxMessengerPlugin = createChatChannelPlugin<ResolvedMaxAccount>({
   },
 
   // Outbound messaging
-  outbound: {
+  outbound: ({
     attachedResults: {
       channel: 'max-messenger',
 
-      sendText: async ({ to, text, accountId, replyToId }) => {
+      sendText: async ({ to, text, accountId, replyToId }: any) => {
         const account = resolveAccount({}, accountId || '');
         const client = new MaxClient({ token: account.token, baseUrl: account.apiBaseUrl });
         const target = parseTarget(to);
         const result = await client.sendMessage(target, {
           text,
-          reply_to: replyToId,
+          reply_to: replyToId ?? undefined,
         });
         return {
           channel: 'max-messenger',
@@ -160,7 +160,7 @@ export const maxMessengerPlugin = createChatChannelPlugin<ResolvedMaxAccount>({
         };
       },
 
-      sendMedia: async ({ to, mediaUrl, accountId }) => {
+      sendMedia: async ({ to, mediaUrl, accountId }: any) => {
         const account = resolveAccount({}, accountId || '');
         const client = new MaxClient({ token: account.token, baseUrl: account.apiBaseUrl });
         const target = parseTarget(to);
@@ -175,11 +175,11 @@ export const maxMessengerPlugin = createChatChannelPlugin<ResolvedMaxAccount>({
         };
       },
     },
-  },
+  }) as any,
 
   // Typing indicator via heartbeat
   heartbeat: {
-    sendTyping: async ({ to }) => {
+    sendTyping: async ({ to }: any) => {
       const account = resolveAccount({}, '');
       const client = new MaxClient({ token: account.token, baseUrl: account.apiBaseUrl });
       const target = parseTarget(to);
@@ -187,7 +187,7 @@ export const maxMessengerPlugin = createChatChannelPlugin<ResolvedMaxAccount>({
         await client.sendChatAction(target.chat_id, 'typing_on');
       }
     },
-    clearTyping: async ({ to }) => {
+    clearTyping: async ({ to }: any) => {
       const account = resolveAccount({}, '');
       const client = new MaxClient({ token: account.token, baseUrl: account.apiBaseUrl });
       const target = parseTarget(to);
@@ -196,7 +196,7 @@ export const maxMessengerPlugin = createChatChannelPlugin<ResolvedMaxAccount>({
       }
     },
   },
-});
+}) as any);
 
 /**
  * Parse target string into MAX API target format.
