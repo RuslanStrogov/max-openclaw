@@ -1,14 +1,37 @@
 {
   "name": "@ruslanstrogov/max-openclaw",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "MAX Messenger channel plugin for OpenClaw",
   "type": "module",
   "license": "MIT",
   "author": "Ruslan Strogov",
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "access": "public"
+  },
+  "files": [
+    "dist",
+    "openclaw.plugin.json",
+    "README.md",
+    "LICENSE"
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/RuslanStrogov/max-openclaw"
   },
+  "homepage": "https://github.com/RuslanStrogov/max-openclaw#readme",
+  "bugs": {
+    "url": "https://github.com/RuslanStrogov/max-openclaw/issues"
+  },
+  "keywords": [
+    "openclaw",
+    "openclaw-plugin",
+    "max",
+    "max-messenger",
+    "max.ru",
+    "bot-api",
+    "channel"
+  ],
   "openclaw": {
     "extensions": [
       "./dist/index.js"

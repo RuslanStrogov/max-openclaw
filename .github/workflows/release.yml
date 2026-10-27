@@ -10,6 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      packages: write
 
     steps:
       - uses: actions/checkout@v4
@@ -19,15 +20,22 @@ jobs:
         with:
           node-version: 22
           cache: 'npm'
+          registry-url: 'https://npm.pkg.github.com'
+          scope: '@ruslanstrogov'
 
       - name: Install dependencies
         run: npm ci
 
-      - name: Type check
+      - name: Build
         run: npm run build
 
       - name: Run tests
         run: npm test
+
+      - name: Publish to GitHub Packages
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
