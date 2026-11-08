@@ -85,7 +85,7 @@ export const maxMessengerPlugin = createChatChannelPlugin<ResolvedMaxAccount>({
     },
 
     setup: {
-      applyAccountConfig: ({ cfg, accountId, input }) => {
+      applyAccountConfig: ({ cfg, accountId, input }: { cfg: any; accountId: string; input: any }) => {
         const newCfg = structuredClone(cfg);
         if (!newCfg.channels) newCfg.channels = {};
         if (!newCfg.channels['max-messenger']) newCfg.channels['max-messenger'] = {};
@@ -104,8 +104,28 @@ export const maxMessengerPlugin = createChatChannelPlugin<ResolvedMaxAccount>({
 
     messaging: {
       targetPrefixes: ['max', 'user', 'chat'],
-      resolveDeliveryTarget: ({ conversationId }) => {
+      resolveDeliveryTarget: ({ conversationId }: { conversationId: string }) => {
         return { to: conversationId };
+      },
+    },
+
+    // Typing indicator via heartbeat
+    heartbeat: {
+      sendTyping: async ({ to }: { to: string }) => {
+        const account = resolveAccount({}, '');
+        const client = new MaxClient({ token: account.token, baseUrl: account.apiBaseUrl });
+        const target = parseTarget(to);
+        if (target.chat_id) {
+          await client.sendChatAction(target.chat_id, 'typing_on');
+        }
+      },
+      clearTyping: async ({ to }: { to: string }) => {
+        const account = resolveAccount({}, '');
+        const client = new MaxClient({ token: account.token, baseUrl: account.apiBaseUrl });
+        const target = parseTarget(to);
+        if (target.chat_id) {
+          await client.sendChatAction(target.chat_id, 'typing_off');
+        }
       },
     },
   } as any,
@@ -142,6 +162,7 @@ export const maxMessengerPlugin = createChatChannelPlugin<ResolvedMaxAccount>({
 
   // Outbound messaging
   outbound: {
+    base: { deliveryMode: 'direct' },
     attachedResults: {
       channel: 'max-messenger',
 
@@ -151,7 +172,7 @@ export const maxMessengerPlugin = createChatChannelPlugin<ResolvedMaxAccount>({
         const target = parseTarget(to);
         const result = await client.sendMessage(target, {
           text,
-          reply_to: replyToId,
+          reply_to: replyToId ?? undefined,
         });
         return {
           channel: 'max-messenger',
@@ -177,25 +198,7 @@ export const maxMessengerPlugin = createChatChannelPlugin<ResolvedMaxAccount>({
     },
   },
 
-  // Typing indicator via heartbeat
-  heartbeat: {
-    sendTyping: async ({ to }) => {
-      const account = resolveAccount({}, '');
-      const client = new MaxClient({ token: account.token, baseUrl: account.apiBaseUrl });
-      const target = parseTarget(to);
-      if (target.chat_id) {
-        await client.sendChatAction(target.chat_id, 'typing_on');
-      }
-    },
-    clearTyping: async ({ to }) => {
-      const account = resolveAccount({}, '');
-      const client = new MaxClient({ token: account.token, baseUrl: account.apiBaseUrl });
-      const target = parseTarget(to);
-      if (target.chat_id) {
-        await client.sendChatAction(target.chat_id, 'typing_off');
-      }
-    },
-  },
+  
 });
 
 /**

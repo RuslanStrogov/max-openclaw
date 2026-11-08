@@ -9,7 +9,7 @@
 import { defineChannelPluginEntry } from 'openclaw/plugin-sdk/channel-core';
 import { maxMessengerPlugin } from './src/channel.js';
 
-export default defineChannelPluginEntry({
+const _pluginEntry = defineChannelPluginEntry({
   id: 'max-messenger',
   name: 'MAX Messenger',
   description: 'MAX Messenger (max.ru) Bot API channel plugin for OpenClaw',
@@ -19,4 +19,5 @@ export default defineChannelPluginEntry({
     // Additional runtime registration (if needed)
     // Webhook handling is managed by OpenClaw's channel runtime
   },
-});
+}) as any;
+export default _pluginEntry;
